@@ -1,8 +1,8 @@
 package com.v1.iskream.layer.controller;
 
 import com.v1.iskream.layer.domain.User;
-import com.v1.iskream.layer.dto.ProductRequestDto;
-import com.v1.iskream.layer.dto.ProductResponseDto;
+import com.v1.iskream.layer.domain.dto.request.ProductRequestDto;
+import com.v1.iskream.layer.domain.dto.response.ProductResponseDto;
 import com.v1.iskream.layer.service.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
