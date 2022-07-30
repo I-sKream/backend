@@ -1,10 +1,17 @@
 package com.v1.iskream.layer.domain;
 
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 
 @Entity
+@Getter
+@AllArgsConstructor
+@NoArgsConstructor
 public class User {
     @Id
     private String id;
@@ -14,4 +21,12 @@ public class User {
 
     @Column(nullable = false)
     private String nickname;
+
+    @Override
+    public String toString() {
+        return "User{" +
+                "id='" + id + '\'' +
+                ", nickname='" + nickname + '\'' +
+                '}';
+    }
 }
