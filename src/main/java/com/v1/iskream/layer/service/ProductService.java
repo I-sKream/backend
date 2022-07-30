@@ -1,28 +1,19 @@
 package com.v1.iskream.layer.service;
-
-import com.v1.iskream.layer.domain.Orders;
-import com.v1.iskream.layer.domain.Price;
-import com.v1.iskream.layer.domain.Product;
-import com.v1.iskream.layer.domain.User;
-import com.v1.iskream.layer.dto.PriceResponseDto;
-import com.v1.iskream.layer.dto.ProductRequestDto;
-import com.v1.iskream.layer.dto.ProductResponseDto;
+import com.v1.iskream.layer.domain.*;
+import com.v1.iskream.layer.domain.dto.request.ProductRequestDto;
+import com.v1.iskream.layer.domain.dto.response.PriceResponseDto;
+import com.v1.iskream.layer.domain.dto.response.ProductResponseDto;
+import com.v1.iskream.layer.domain.dto.response.ThumbnailResponseDto;
 import com.v1.iskream.layer.repository.OrdersRepository;
 import com.v1.iskream.layer.repository.PriceRepository;
 import com.v1.iskream.layer.repository.ProductRepository;
-import lombok.extern.log4j.Log4j2;
-import lombok.extern.slf4j.Slf4j;
-import org.slf4j.ILoggerFactory;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 @Transactional
 @Service
@@ -43,17 +34,29 @@ public class ProductService {
         Product product = productRepository.findById(product_id).orElseThrow(
                 () -> new IllegalArgumentException("상품을 찾을 수 업습니다.")
         );
-        List<Price> prices = priceRepository.findAllByProduct(product);
-//        List<Price> prices = product.getPrices();
-        Price minPrice = new Price();
-        int totalPrice = 0;
-        for(Price price : prices) {
-            totalPrice += price.getPrice();
-            minPrice = priceRepository.findTopByProductAndSizeOrderByPriceAsc(product, price.getSize());
+        List<Thumbnail> thumbnails = product.getThumbnails();
+        List<ThumbnailResponseDto> thumbList = new ArrayList<>();
+        for(Thumbnail thumbnail : thumbnails){
+            ThumbnailResponseDto responseDto = new ThumbnailResponseDto(thumbnail.getUrl());
+            thumbList.add(responseDto);
         }
-        int averagePrice = totalPrice/prices.size();
-        int priceDiff = minPrice.getPrice()-averagePrice;
-        return new ProductResponseDto(product, minPrice, priceDiff);
+//        List<Price> prices = product.getPrices();
+        List<Price> prices = priceRepository.findAllByProductOrderByPriceDesc(product);
+        List<PriceResponseDto> priceList = new ArrayList<>();
+        Map<Integer,PriceResponseDto> map = new HashMap<>();
+        for(Price price : prices) {
+            List<Price> sizes = priceRepository.findAllByProductAndSizeOrderByPriceDesc(product, price.getSize());
+            int totalPrice = 0;
+            for(Price size : sizes) totalPrice += size.getPrice();
+            int averagePrice = totalPrice/sizes.size();
+//            Price maxPrice = priceRepository.findTopByProductAndSizeOrderByPriceDesc(product, price.getSize());
+            int priceDiff = price.getPrice()-averagePrice;
+            PriceResponseDto responseDto = new PriceResponseDto(price, priceDiff);
+            map.put(price.getSize(), responseDto);
+        }
+        Set<Integer> keySet = map.keySet();
+        for(Integer key : keySet) priceList.add(map.get(key));
+        return new ProductResponseDto(product,priceList,thumbList);
     }
 
     public ResponseEntity<String> buy(Long product_id, ProductRequestDto requestDto, User user) {

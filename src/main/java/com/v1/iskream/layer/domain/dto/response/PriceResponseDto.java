@@ -1,4 +1,4 @@
-package com.v1.iskream.layer.dto;
+package com.v1.iskream.layer.domain.dto.response;
 
 import com.v1.iskream.layer.domain.Price;
 import lombok.Getter;
