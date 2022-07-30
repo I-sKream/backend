@@ -21,7 +21,7 @@ public class Product {
     @OneToMany(mappedBy = "price", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Price> prices;
 
-    @OneToMany(mappedBy = "thumbnail", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "url", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Thumbnail> thumbnails;
 
     public Product() {
