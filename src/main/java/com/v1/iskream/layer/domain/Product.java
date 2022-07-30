@@ -27,4 +27,9 @@ public class Product {
     public Product() {
 
     }
+
+    public void addPrice(Price price){
+        prices.add(price);
+        price.setProduct(this);
+    }
 }
