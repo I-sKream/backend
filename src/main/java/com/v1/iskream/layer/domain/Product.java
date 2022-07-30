@@ -18,11 +18,11 @@ public class Product {
     @Column(nullable = false)
     private String name;
 
-    @Column(nullable = false)
-    private String img;
-
     @OneToMany(mappedBy = "price", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Price> prices;
+
+    @OneToMany(mappedBy = "thumbnail", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<Thumbnail> thumbnails;
 
     public Product() {
 

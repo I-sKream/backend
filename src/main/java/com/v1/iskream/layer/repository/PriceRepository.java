@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.List;
 
 public interface PriceRepository extends JpaRepository<Price, Long> {
-    List<Price> findAllByProduct(Product product);
+    List<Price> findAllByProductOrderByPriceDesc(Product product);
+    List<Price> findAllByProductAndSizeOrderByPriceDesc(Product product,int size);
     Price findTopByProductAndSizeOrderByPriceAsc(Product product,int size);
 }
