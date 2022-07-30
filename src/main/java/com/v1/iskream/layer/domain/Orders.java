@@ -13,4 +13,9 @@ public class Orders extends Timestamped{
 
     @OneToOne
     Price price;
+
+    public Orders(User buyer, Price price) {
+        this.buyer = buyer;
+        this.price = price;
+    }
 }

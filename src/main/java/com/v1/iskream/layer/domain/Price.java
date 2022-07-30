@@ -22,4 +22,8 @@ public class Price {
 
     @ManyToOne
     private User seller;
+
+    public void setProduct(Product product) {
+        this.product = product;
+    }
 }
