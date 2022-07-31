@@ -2,7 +2,6 @@ package com.v1.iskream.layer.repository;
 
 import com.v1.iskream.layer.domain.Product;
 import com.v1.iskream.layer.domain.RecentProductInterface;
-import com.v1.iskream.layer.domain.dto.response.RecentProductResponseDto;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 

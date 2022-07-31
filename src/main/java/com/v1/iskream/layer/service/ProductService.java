@@ -3,7 +3,7 @@ import com.v1.iskream.layer.domain.*;
 import com.v1.iskream.layer.domain.dto.request.ProductRequestDto;
 import com.v1.iskream.layer.domain.dto.response.PriceResponseDto;
 import com.v1.iskream.layer.domain.dto.response.ProductResponseDto;
-import com.v1.iskream.layer.domain.dto.response.RecentProductResponseDto;
+import com.v1.iskream.layer.domain.dto.response.SimpleProductResponseDto;
 import com.v1.iskream.layer.domain.dto.response.ThumbnailResponseDto;
 import com.v1.iskream.layer.repository.OrdersRepository;
 import com.v1.iskream.layer.repository.PriceRepository;
@@ -77,7 +77,7 @@ public class ProductService {
     }
 
     // 최근 등록 상품 조회 로직
-    public List<RecentProductResponseDto> getProducts(int limit, int offset){
+    public List<SimpleProductResponseDto> getProducts(int limit, int offset){
         return productRepository.findRecentProduct(limit,offset).stream()
                 .map(x -> mappingRecentProductResponse(x))
                 .collect(Collectors.toList());
@@ -92,8 +92,9 @@ public class ProductService {
     }
 
     // recent product 조회 값 response 변환
-    private RecentProductResponseDto mappingRecentProductResponse(RecentProductInterface recentProductInterface){
-        return RecentProductResponseDto.builder()
+    private SimpleProductResponseDto mappingRecentProductResponse(RecentProductInterface recentProductInterface){
+        return SimpleProductResponseDto.builder()
+                .id(recentProductInterface.getId())
                 .product_name_eng(recentProductInterface.getProductNameEng())
                 .product_brand(recentProductInterface.getProductBrand())
                 .thumbnail(recentProductInterface.getThumbnail())
