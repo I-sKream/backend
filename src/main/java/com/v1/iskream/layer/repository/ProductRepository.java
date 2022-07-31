@@ -11,7 +11,7 @@ import java.util.List;
 public interface ProductRepository extends JpaRepository<Product, Long> {
 
     @Query(value =
-            "SELECT product.id as id, product.name as product_name_eng, product.brand as product_brand, c.url as thumbnail\n" +
+            "SELECT product.id as id, product.name as productNameEng, product.brand as productBrand, c.url as thumbnail\n" +
                     "FROM (\n" +
                     "\tSELECT th.id, url, th.product_id\n" +
                     "    FROM kream.thumbnail as th\n" +
@@ -30,10 +30,11 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
                     "\t\tFROM kream.price as price \n" +
                     "\t\tGROUP BY product_id\n" +
                     "\t\tORDER BY price.id DESC\n" +
-                    "\t\tLIMIT 15\n" +
+                    "\t\tLIMIT :limit\n" +
+                    "        offset :offset\n" +
                     "    ) as tmp\n" +
                     ");"
             , nativeQuery = true
     )
-    List<RecentProductInterface> findRecentProduct();
+    List<RecentProductInterface> findRecentProduct(int limit, int offset);
 }

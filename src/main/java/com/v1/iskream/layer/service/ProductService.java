@@ -77,8 +77,8 @@ public class ProductService {
     }
 
     // 최근 등록 상품 조회 로직
-    public List<RecentProductResponseDto> recentProduct(){
-        return productRepository.findRecentProduct().stream()
+    public List<RecentProductResponseDto> getProducts(int limit, int offset){
+        return productRepository.findRecentProduct(limit,offset).stream()
                 .map(x -> mappingRecentProductResponse(x))
                 .collect(Collectors.toList());
     }
