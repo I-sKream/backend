@@ -11,7 +11,8 @@ import java.math.BigInteger;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class RecentProductResponseDto {
+public class SimpleProductResponseDto {
+    private Long id;
     private String thumbnail;
     private String product_name_eng;
     private BigInteger product_price;
@@ -19,8 +20,9 @@ public class RecentProductResponseDto {
 
     @Override
     public String toString() {
-        return "RecentProductResponseDto{" +
-                "thumbnail='" + thumbnail + '\'' +
+        return "SimpleProductResponseDto{" +
+                "id=" + id +
+                ", thumbnail='" + thumbnail + '\'' +
                 ", product_name_eng='" + product_name_eng + '\'' +
                 ", product_price=" + product_price +
                 ", product_brand='" + product_brand + '\'' +
