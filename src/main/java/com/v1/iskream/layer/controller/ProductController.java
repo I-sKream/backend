@@ -34,7 +34,7 @@ public class ProductController {
     }
 
     @GetMapping("/api/products/recent")
-    public ResponseEntity getBuy(){
+    public ResponseEntity getRecentProducts(){
         List<RecentProductResponseDto> productResponseDtoList = productService.recentProduct();
         return new ResponseEntity(productResponseDtoList, HttpStatus.OK);
     }
