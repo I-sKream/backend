@@ -3,6 +3,7 @@ import com.v1.iskream.layer.domain.*;
 import com.v1.iskream.layer.domain.dto.request.ProductRequestDto;
 import com.v1.iskream.layer.domain.dto.response.PriceResponseDto;
 import com.v1.iskream.layer.domain.dto.response.ProductResponseDto;
+import com.v1.iskream.layer.domain.dto.response.SimpleProductResponseDto;
 import com.v1.iskream.layer.domain.dto.response.ThumbnailResponseDto;
 import com.v1.iskream.layer.repository.OrdersRepository;
 import com.v1.iskream.layer.repository.PriceRepository;
@@ -13,7 +14,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
+import java.math.BigInteger;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Transactional
 @Service
@@ -71,5 +74,31 @@ public class ProductService {
         } else throw new IllegalArgumentException("해당 사이즈가 없습니다.");
         String msg = "구매 성공";
         return new ResponseEntity<>(msg, HttpStatus.OK);
+    }
+
+    // 최근 등록 상품 조회 로직
+    public List<SimpleProductResponseDto> getProducts(int limit, int offset){
+        return productRepository.findRecentProduct(limit,offset).stream()
+                .map(x -> mappingRecentProductResponse(x))
+                .collect(Collectors.toList());
+    }
+
+    // 평균 가격 구하는 로직 - recentProduct
+    private BigInteger getAvgPriceFromProduct(Long product_id){
+        BigInteger price = priceRepository.avgPriceById(product_id);
+        price = price.divide(BigInteger.valueOf(10000));
+        price = price.multiply(BigInteger.valueOf(10000));
+        return price;
+    }
+
+    // recent product 조회 값 response 변환
+    private SimpleProductResponseDto mappingRecentProductResponse(RecentProductInterface recentProductInterface){
+        return SimpleProductResponseDto.builder()
+                .id(recentProductInterface.getId())
+                .product_name_eng(recentProductInterface.getProductNameEng())
+                .product_brand(recentProductInterface.getProductBrand())
+                .thumbnail(recentProductInterface.getThumbnail())
+                .product_price(getAvgPriceFromProduct(recentProductInterface.getId()))
+                .build();
     }
 }

@@ -1,8 +1,11 @@
 package com.v1.iskream.layer.domain;
 
+import lombok.NoArgsConstructor;
+
 import javax.persistence.*;
 
 @Entity
+@NoArgsConstructor
 public class Orders extends Timestamped{
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Id
