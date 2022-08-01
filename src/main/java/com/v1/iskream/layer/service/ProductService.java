@@ -81,6 +81,16 @@ public class ProductService {
         return new ResponseEntity<>(msg, HttpStatus.OK);
     }
 
+    public ResponseEntity<String> sell(Long product_id, ProductRequestDto requestDto, User user){
+        Product product = productRepository.findById(product_id).orElseThrow(
+                () -> new IllegalArgumentException("상품을 찾을 수 없습니다.")
+        );
+        Price price = new Price(requestDto,product,user);
+        priceRepository.save(price);
+        String msg = "판매 성공";
+        return new ResponseEntity<>(msg, HttpStatus.OK);
+    }
+
     // 최근 등록 상품 조회 로직
     public List<SimpleProductResponseDto> getProducts(int limit, int offset){
         return productRepository.findRecentProduct(limit,offset).stream()

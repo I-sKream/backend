@@ -36,6 +36,11 @@ public class ProductController {
         return productService.buy(product_id,requestDto,user);
     }
 
+    @PostMapping("/api/products/sell/{product_id}")
+    public ResponseEntity<String> getSell(@PathVariable Long product_id, @RequestBody ProductRequestDto requestDto, @AuthenticationPrincipal User user){
+        return productService.sell(product_id,requestDto,user);
+    }
+
     @GetMapping("/api/products/recent")
     public ResponseEntity getRecentProducts(){
         List<SimpleProductResponseDto> productResponseDtoList = productService.getProducts(15,0);
