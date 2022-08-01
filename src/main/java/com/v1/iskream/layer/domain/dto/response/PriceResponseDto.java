@@ -1,13 +1,17 @@
 package com.v1.iskream.layer.domain.dto.response;
 
 import com.v1.iskream.layer.domain.Price;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
+@AllArgsConstructor
+@NoArgsConstructor
 @Getter
 public class PriceResponseDto implements Comparable<PriceResponseDto>{
-    private final int size;
-    private final int price;
-    private final int price_diff;
+    private int size;
+    private int price;
+    private int price_diff;
 
     public PriceResponseDto(Price price, int price_diff) {
         this.size = price.getSize();
