@@ -16,15 +16,28 @@ public class Product {
     private String brand;
 
     @Column(nullable = false)
-    private String name;
+    private String nameEng;
 
     @Column(nullable = false)
-    private String img;
+    private String nameKor;
 
-    @OneToMany(mappedBy = "price", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Price> prices;
+
+    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<Thumbnail> thumbnails;
 
     public Product() {
 
+    }
+
+    public void addThumbnail(Thumbnail thumbnail){
+        thumbnails.add(thumbnail);
+        thumbnail.setProduct(this);
+    }
+
+    public void addPrice(Price price){
+        prices.add(price);
+        price.setProduct(this);
     }
 }

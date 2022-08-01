@@ -1,5 +1,6 @@
 package com.v1.iskream.layer.domain;
 
+import com.v1.iskream.layer.domain.dto.request.ProductRequestDto;
 import lombok.Getter;
 
 import javax.persistence.*;
@@ -22,4 +23,20 @@ public class Price {
 
     @ManyToOne
     private User seller;
+
+    public Price() {
+
+    }
+
+    public Price(ProductRequestDto requestDto, Product product, User seller) {
+        this.size = requestDto.getSize();
+        this.price = requestDto.getPrice();
+        this.product = product;
+        this.seller = seller;
+    }
+
+
+    public void setProduct(Product product) {
+        this.product = product;
+    }
 }
