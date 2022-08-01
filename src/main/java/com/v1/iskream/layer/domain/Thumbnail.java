@@ -1,11 +1,15 @@
 package com.v1.iskream.layer.domain;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 
 @Getter
 @Entity
+@NoArgsConstructor
+@AllArgsConstructor
 public class Thumbnail {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Id
