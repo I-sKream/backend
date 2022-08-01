@@ -25,7 +25,7 @@ public class JWTLoginFilter extends UsernamePasswordAuthenticationFilter {
 
     public JWTLoginFilter(AuthenticationManager authenticationManager) {
         super(authenticationManager);
-        setFilterProcessesUrl("/api/users/login");
+        setFilterProcessesUrl("/users/login");
     }
 
     // 검증 과정
