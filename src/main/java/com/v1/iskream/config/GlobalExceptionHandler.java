@@ -7,11 +7,13 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 
 @ControllerAdvice
 public class GlobalExceptionHandler {
-    @ExceptionHandler(Throwable.class)
-    public ResponseEntity<String> handlerException(Exception e){
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<String> handlerException(IllegalArgumentException e){
         String msg = e.getMessage();
         return new ResponseEntity<>(
                 msg, HttpStatus.BAD_REQUEST
         );
     }
+
+
 }
