@@ -43,13 +43,13 @@ public class ProductController {
 
     @GetMapping("/api/products/recent")
     public ResponseEntity getRecentProducts(){
-        List<SimpleProductResponseDto> productResponseDtoList = productService.getProducts(15,0);
+        List<SimpleProductResponseDto> productResponseDtoList = productService.getProducts(16,0);
         return new ResponseEntity(productResponseDtoList, HttpStatus.OK);
     }
 
     @GetMapping("/api/products")
     public ResponseEntity getProducts(@RequestParam @Min(1) int page){
-        List<SimpleProductResponseDto> productResponseDtoList = productService.getProducts(15, (page-1) * 15);
+        List<SimpleProductResponseDto> productResponseDtoList = productService.getProducts(16, (page-1) * 15);
         return new ResponseEntity(productResponseDtoList, HttpStatus.OK);
     }
 }

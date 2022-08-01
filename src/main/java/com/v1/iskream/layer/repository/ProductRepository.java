@@ -10,7 +10,7 @@ import java.util.List;
 public interface ProductRepository extends JpaRepository<Product, Long> {
 
     @Query(value =
-            "SELECT product.id as id, product.name as productNameEng, product.brand as productBrand, c.url as thumbnail\n" +
+            "SELECT product.id as id, product.name_eng as productNameEng, product.brand as productBrand, c.url as thumbnail\n" +
                     "FROM (\n" +
                     "\tSELECT th.id, url, th.product_id\n" +
                     "    FROM kream.thumbnail as th\n" +
