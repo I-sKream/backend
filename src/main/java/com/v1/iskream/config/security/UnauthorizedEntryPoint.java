@@ -22,9 +22,15 @@ public class UnauthorizedEntryPoint implements AuthenticationEntryPoint {
     public void commence(HttpServletRequest httpServletRequest,
                          HttpServletResponse httpServletResponse,
                          AuthenticationException e) throws IOException, ServletException {
-
+        String msg = messageFilter(e.getLocalizedMessage());
         httpServletResponse.setContentType("application/json;charset=UTF-8");
         httpServletResponse.setStatus(HttpStatus.BAD_REQUEST.value());
-        httpServletResponse.getWriter().print("로그인이 필요합니다.");
+        httpServletResponse.getWriter().print(msg);
     }
+    private String messageFilter(String msg){
+        if(msg.equals("Full authentication is required to access this resource"))
+            return "로그인이 필요합니다.";
+        return msg;
+    }
+
 }

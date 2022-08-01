@@ -32,7 +32,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     protected void configure(HttpSecurity http) throws Exception {
 
         JWTLoginFilter jwtLoginFilter = new JWTLoginFilter(authenticationManager());
-        JWTCheckFilter jwtCheckFilter = new JWTCheckFilter(authenticationManager(), userService);
+        JWTCheckFilter jwtCheckFilter = new JWTCheckFilter(authenticationManager(), userService, unauthorizedEntryPoint);
 
         http
                 .csrf().disable()

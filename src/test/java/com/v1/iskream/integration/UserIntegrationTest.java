@@ -1,5 +1,8 @@
 package com.v1.iskream.integration;
 
+import com.auth0.jwt.JWT;
+import com.auth0.jwt.algorithms.Algorithm;
+import com.v1.iskream.config.security.jwt.JWTUtil;
 import com.v1.iskream.config.security.passwordEncoder.PasswordEncoder;
 import com.v1.iskream.layer.domain.User;
 import com.v1.iskream.layer.domain.dto.response.ProductResponseDto;
@@ -11,10 +14,11 @@ import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.test.context.ActiveProfiles;
+
+import java.time.Instant;
+import java.util.Arrays;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -39,6 +43,22 @@ public class UserIntegrationTest {
     @AfterEach
     private void resetDB(){
         userRepository.deleteAll();
+    }
+
+    private static final Algorithm ALGORITHM = Algorithm.HMAC256("carrykim");
+
+    public HttpHeaders getLoginHeader(String username){
+        String token = JWT.create()
+                .withSubject(username)
+                .withClaim("exp", Instant.now().getEpochSecond() + 60*60)
+                .sign(ALGORITHM);
+        String authorizationHeader = "Bearer " + token;
+        HttpHeaders requestHeaders = new HttpHeaders();
+        requestHeaders.setContentType(MediaType.APPLICATION_JSON);
+        requestHeaders.setAccept(Arrays.asList(MediaType.APPLICATION_JSON));
+        requestHeaders.add("Authorization",authorizationHeader);
+
+        return requestHeaders;
     }
 
     @Nested
@@ -175,6 +195,84 @@ public class UserIntegrationTest {
             assertNotNull(responseBody);
             assertEquals("로그인 요청 형식에 맞지 않습니다.",responseBody.getMsg());
             assertNull(responseBody.getToken());
+        }
+    }
+
+    @Nested
+    @DisplayName("토큰 로그인")
+    class LoginWithToken{
+        @Test
+        @DisplayName("성공")
+        void test1(){
+            //given
+            HttpHeaders httpHeaders = getLoginHeader("user");
+            HttpEntity loginRequest = new HttpEntity<>(httpHeaders);
+
+            //when
+            ResponseEntity<User> response = testTemplate
+                    .exchange(
+                            "/api/users/detail/data",
+                            HttpMethod.GET,
+                            loginRequest,
+                            User.class
+                    );
+            //then
+            assertEquals(HttpStatus.OK, response.getStatusCode());
+            User responseBody = response.getBody();
+            assertNotNull(responseBody);
+            assertEquals("user", responseBody.getId());
+        }
+
+        @Test
+        @DisplayName("실패 - 존재하지 않는 유저")
+        void test2(){
+            //given
+            HttpHeaders httpHeaders = getLoginHeader("user1");
+            HttpEntity loginRequest = new HttpEntity<>(httpHeaders);
+
+            //when
+            ResponseEntity<String> response = testTemplate
+                    .exchange(
+                            "/api/users/detail/data",
+                            HttpMethod.GET,
+                            loginRequest,
+                            String.class
+                    );
+            //then
+            assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+            String responseBody = response.getBody();
+            assertEquals("존재하지 않는 유저입니다.", responseBody);
+        }
+
+        @Test
+        @DisplayName("실패 - 유효하지 않은 토큰 형태")
+        void test3(){
+            //given
+            String wrongToken = JWT.create()
+                    .withSubject("user")
+                    .withClaim("exp", Instant.now().getEpochSecond() + 60*60)
+                    .sign(ALGORITHM) + "wrong";
+
+            String authorizationHeader = "Bearer " + wrongToken;
+            HttpHeaders requestHeaders = new HttpHeaders();
+            requestHeaders.setContentType(MediaType.APPLICATION_JSON);
+            requestHeaders.setAccept(Arrays.asList(MediaType.APPLICATION_JSON));
+            requestHeaders.add("Authorization",authorizationHeader);
+
+            HttpEntity loginRequest = new HttpEntity<>(requestHeaders);
+
+            //when
+            ResponseEntity<String> response = testTemplate
+                    .exchange(
+                            "/api/users/detail/data",
+                            HttpMethod.GET,
+                            loginRequest,
+                            String.class
+                    );
+            //then
+            assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+            String responseBody = response.getBody();
+            assertEquals("유효하지 않은 토큰입니다.", responseBody);
         }
     }
 

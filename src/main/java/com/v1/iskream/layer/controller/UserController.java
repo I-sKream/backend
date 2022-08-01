@@ -1,9 +1,11 @@
 package com.v1.iskream.layer.controller;
 
+import com.v1.iskream.layer.domain.User;
 import com.v1.iskream.layer.domain.dto.request.SignupRequestDto;
 import com.v1.iskream.layer.service.UserService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -20,6 +22,12 @@ public class UserController {
     public ResponseEntity signUp(@RequestBody SignupRequestDto signupRequestDto){
         userService.save(signupRequestDto);
         return new ResponseEntity(HttpStatus.OK);
+    }
+
+    @GetMapping("/detail/data")
+    public ResponseEntity userData(@AuthenticationPrincipal User user){
+        System.out.println(user);
+        return new ResponseEntity(user, HttpStatus.OK);
     }
 
 }
