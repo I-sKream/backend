@@ -69,24 +69,28 @@ public class ProductService {
         Product product = productRepository.findById(product_id).orElseThrow(
                 () -> new IllegalArgumentException("상품을 찾을 수 없습니다.")
         );
+        if(NotLogin(user)) throw new IllegalArgumentException("로그인이 필요합니다.");
+        if(EmptyValue(requestDto)) throw new IllegalArgumentException("값을 입력해주세요.");
         Price price = priceRepository.findTopByProductAndSizeOrderByPriceAsc(product, requestDto.getSize());
         if (price != null) {
             Orders order = new Orders(user, price);
             ordersRepository.save(order);
         } else throw new IllegalArgumentException("해당 사이즈가 없습니다.");
         String msg = "구매 성공";
-        return new ResponseEntity<>(msg, HttpStatus.OK);
+        return new ResponseEntity<>(msg, HttpStatus.CREATED);
     }
 
     public ResponseEntity<String> sell(Long product_id, ProductRequestDto requestDto, User user){
         Product product = productRepository.findById(product_id).orElseThrow(
                 () -> new IllegalArgumentException("상품을 찾을 수 없습니다.")
         );
+        if(NotLogin(user)) throw new IllegalArgumentException("로그인이 필요합니다.");
+        if(EmptyValues(requestDto)) throw new IllegalArgumentException("값을 입력해주세요.");
         Price price = new Price(requestDto,product,user);
         product.addPrice(price);
         priceRepository.save(price);
         String msg = "판매 성공";
-        return new ResponseEntity<>(msg, HttpStatus.OK);
+        return new ResponseEntity<>(msg, HttpStatus.CREATED);
     }
 
     // 최근 등록 상품 조회 로직
@@ -113,5 +117,16 @@ public class ProductService {
                 .thumbnail(recentProductInterface.getThumbnail())
                 .product_price(getAvgPriceFromProduct(recentProductInterface.getId()))
                 .build();
+    }
+
+    public boolean NotLogin(User user){
+        return user == null;
+    }
+
+    public boolean EmptyValue(ProductRequestDto requestDto){
+        return requestDto.getSize() == 0;
+    }
+    public boolean EmptyValues(ProductRequestDto requestDto){
+        return requestDto.getSize() == 0 || requestDto.getPrice() == 0;
     }
 }
