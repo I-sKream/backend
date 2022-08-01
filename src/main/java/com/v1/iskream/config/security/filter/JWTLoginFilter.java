@@ -56,7 +56,7 @@ public class JWTLoginFilter extends UsernamePasswordAuthenticationFilter {
 
         UserDetailImpl userDetail = (UserDetailImpl) authResult.getPrincipal();
         String token =  JWTUtil.getToken(userDetail);
-        LoginResponseDto loginResponseDto = new LoginResponseDto(200, "로그인에 성공했습니다.");
+        LoginResponseDto loginResponseDto = new LoginResponseDto(200, "로그인에 성공했습니다.", token);
 
         response.setHeader(HttpHeaders.AUTHORIZATION, "Bearer " + token);
         response.setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE);
@@ -68,7 +68,7 @@ public class JWTLoginFilter extends UsernamePasswordAuthenticationFilter {
             HttpServletRequest request,
             HttpServletResponse response,
             AuthenticationException failed) throws IOException, ServletException {
-        LoginResponseDto errorResponse = new LoginResponseDto(401, "로그인 정보가 일치하지 않습니다.");
+        LoginResponseDto errorResponse = new LoginResponseDto(401, "로그인 정보가 일치하지 않습니다.", "");
         response.setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE);
         response.getOutputStream().write(objectMapper.writeValueAsBytes(errorResponse));
     }
