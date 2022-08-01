@@ -4,6 +4,7 @@ import com.v1.iskream.config.security.filter.JWTCheckFilter;
 import com.v1.iskream.config.security.filter.JWTLoginFilter;
 import com.v1.iskream.config.security.userDtail.UserDetailServiceImpl;
 import org.springframework.context.annotation.Bean;
+import org.springframework.http.*;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -20,9 +21,11 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     private final UserDetailServiceImpl userService;
+    private final UnauthorizedEntryPoint unauthorizedEntryPoint;
 
-    public SecurityConfig(UserDetailServiceImpl userService) {
+    public SecurityConfig(UserDetailServiceImpl userService, UnauthorizedEntryPoint unauthorizedEntryPoint) {
         this.userService = userService;
+        this.unauthorizedEntryPoint = unauthorizedEntryPoint;
     }
 
     @Override
@@ -38,12 +41,16 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()
                 .authorizeRequests()
-                .anyRequest().permitAll()
+                .antMatchers("/api/users/**", "/api/products/recent", "/api/products", "/api/products/{product_id}").permitAll()
+                .antMatchers(HttpMethod.OPTIONS,"/api/**").permitAll()
+                .anyRequest().authenticated()
                 .and()
                 .httpBasic()
                 .and()
                 .addFilterAt(jwtLoginFilter, UsernamePasswordAuthenticationFilter.class)
                 .addFilterAt(jwtCheckFilter, BasicAuthenticationFilter.class)
+                .exceptionHandling()
+                .authenticationEntryPoint(unauthorizedEntryPoint)
         ;
     }
 
