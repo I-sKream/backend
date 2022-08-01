@@ -20,7 +20,6 @@ public class UserController {
 
     @PostMapping("/signup")
     public ResponseEntity signUp(@RequestBody SignupRequestDto signupRequestDto){
-        System.out.println(signupRequestDto);
         userService.save(signupRequestDto);
         return new ResponseEntity(HttpStatus.OK);
     }
