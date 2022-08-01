@@ -31,7 +31,7 @@ public class ProductController {
         return productService.details(product_id);
     }
 
-    @PostMapping("/api/products/{product_id}")
+    @PostMapping("/api/products/buy/{product_id}")
     public ResponseEntity<String> getBuy(@PathVariable Long product_id, @RequestBody ProductRequestDto requestDto, @AuthenticationPrincipal User user){
         return productService.buy(product_id,requestDto,user);
     }
