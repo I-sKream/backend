@@ -4,7 +4,7 @@ import com.v1.iskream.layer.domain.Price;
 import lombok.Getter;
 
 @Getter
-public class PriceResponseDto {
+public class PriceResponseDto implements Comparable<PriceResponseDto>{
     private final int size;
     private final int price;
     private final int price_diff;
@@ -13,5 +13,10 @@ public class PriceResponseDto {
         this.size = price.getSize();
         this.price = price.getPrice();
         this.price_diff = price_diff;
+    }
+
+    @Override
+    public int compareTo(PriceResponseDto responseDto) {
+        return Integer.compare(size, responseDto.size);
     }
 }

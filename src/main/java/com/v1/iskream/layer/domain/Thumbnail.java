@@ -16,4 +16,8 @@ public class Thumbnail {
 
     @Column(nullable = false)
     private String url;
+
+    public void setProduct(Product product) {
+        this.product = product;
+    }
 }

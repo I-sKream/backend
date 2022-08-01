@@ -8,6 +8,7 @@ import com.v1.iskream.layer.domain.dto.response.ThumbnailResponseDto;
 import com.v1.iskream.layer.repository.OrdersRepository;
 import com.v1.iskream.layer.repository.PriceRepository;
 import com.v1.iskream.layer.repository.ProductRepository;
+import com.v1.iskream.layer.repository.ThumbnailRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -25,19 +26,22 @@ public class ProductService {
     private final ProductRepository productRepository;
     private final OrdersRepository ordersRepository;
     private final PriceRepository priceRepository;
+    private final ThumbnailRepository thumbnailRepository;
 
     @Autowired
-    public ProductService(ProductRepository productRepository, OrdersRepository ordersRepository, PriceRepository priceRepository) {
+    public ProductService(ProductRepository productRepository, OrdersRepository ordersRepository, PriceRepository priceRepository, ThumbnailRepository thumbnailRepository) {
         this.productRepository = productRepository;
         this.ordersRepository = ordersRepository;
         this.priceRepository = priceRepository;
+        this.thumbnailRepository = thumbnailRepository;
     }
 
     public ProductResponseDto details(Long product_id) {
         Product product = productRepository.findById(product_id).orElseThrow(
-                () -> new IllegalArgumentException("상품을 찾을 수 업습니다.")
+                () -> new IllegalArgumentException("상품을 찾을 수 없습니다.")
         );
-        List<Thumbnail> thumbnails = product.getThumbnails();
+//        List<Thumbnail> thumbnails = product.getThumbnails();
+        List<Thumbnail> thumbnails = thumbnailRepository.findAllByProduct(product);
         List<ThumbnailResponseDto> thumbList = new ArrayList<>();
         for(Thumbnail thumbnail : thumbnails){
             ThumbnailResponseDto responseDto = new ThumbnailResponseDto(thumbnail.getUrl());
@@ -59,12 +63,13 @@ public class ProductService {
         }
         Set<Integer> keySet = map.keySet();
         for(Integer key : keySet) priceList.add(map.get(key));
+        Collections.sort(priceList);
         return new ProductResponseDto(product,priceList,thumbList);
     }
 
     public ResponseEntity<String> buy(Long product_id, ProductRequestDto requestDto, User user) {
         Product product = productRepository.findById(product_id).orElseThrow(
-                () -> new IllegalArgumentException("상품을 찾을 수 업습니다.")
+                () -> new IllegalArgumentException("상품을 찾을 수 없습니다.")
         );
         Price price = priceRepository.findTopByProductAndSizeOrderByPriceAsc(product, requestDto.getSize());
         if (price != null) {
