@@ -34,6 +34,7 @@ public class ProductService {
         this.priceRepository = priceRepository;
     }
 
+    // 상품 상세조회
     public ProductResponseDto details(Long product_id) {
         Product product = productRepository.findById(product_id).orElseThrow(
                 () -> new IllegalArgumentException("상품을 찾을 수 없습니다.")
@@ -55,7 +56,6 @@ public class ProductService {
             for(Price size : sizes) totalPrice += size.getPrice();
             int averagePrice = totalPrice/sizes.size();
             int priceDiff = price.getPrice()-averagePrice;
-//            Price maxPrice = priceRepository.findTopByProductAndSizeOrderByPriceDesc(product, price.getSize());
             PriceResponseDto responseDto = new PriceResponseDto(price, priceDiff);
             map.put(price.getSize(), responseDto);
         }
@@ -65,6 +65,7 @@ public class ProductService {
         return new ProductResponseDto(product,priceList,thumbList);
     }
 
+    // 상품 구매
     public ResponseEntity<String> buy(Long product_id, ProductRequestDto requestDto, User user) {
         Product product = productRepository.findById(product_id).orElseThrow(
                 () -> new IllegalArgumentException("상품을 찾을 수 없습니다.")
@@ -80,12 +81,14 @@ public class ProductService {
         return new ResponseEntity<>(msg, HttpStatus.CREATED);
     }
 
+    // 상품 판매
     public ResponseEntity<String> sell(Long product_id, ProductRequestDto requestDto, User user){
         Product product = productRepository.findById(product_id).orElseThrow(
                 () -> new IllegalArgumentException("상품을 찾을 수 없습니다.")
         );
         if(NotLogin(user)) throw new IllegalArgumentException("로그인이 필요합니다.");
         if(EmptyValues(requestDto)) throw new IllegalArgumentException("값을 입력해주세요.");
+        if(UnitPrice(requestDto)) throw new IllegalArgumentException("가격은 천원단위로 입력해주세요.");
         Price price = new Price(requestDto,product,user);
         product.addPrice(price);
         priceRepository.save(price);
@@ -122,11 +125,13 @@ public class ProductService {
     public boolean NotLogin(User user){
         return user == null;
     }
-
     public boolean EmptyValue(ProductRequestDto requestDto){
         return requestDto.getSize() == 0;
     }
     public boolean EmptyValues(ProductRequestDto requestDto){
         return requestDto.getSize() == 0 || requestDto.getPrice() == 0;
+    }
+    public boolean UnitPrice(ProductRequestDto requestDto){
+        return requestDto.getPrice() % 1000 != 0;
     }
 }

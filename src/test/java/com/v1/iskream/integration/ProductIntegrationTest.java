@@ -2,9 +2,15 @@ package com.v1.iskream.integration;
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
+import com.v1.iskream.config.security.passwordEncoder.PasswordEncoder;
+import com.v1.iskream.layer.domain.Product;
+import com.v1.iskream.layer.domain.User;
 import com.v1.iskream.layer.domain.dto.response.ProductResponseDto;
+import com.v1.iskream.layer.repository.ProductRepository;
+import com.v1.iskream.layer.repository.UserRepository;
 import lombok.Builder;
 import lombok.Getter;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -12,6 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.http.*;
+import org.springframework.test.context.ActiveProfiles;
 
 import java.time.Instant;
 import java.util.Arrays;
@@ -20,17 +27,23 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@ActiveProfiles("test")
 public class ProductIntegrationTest {
 
     @Autowired
     TestRestTemplate testRestTemplate;
-    private static final Algorithm ALGORITHM = Algorithm.HMAC256("carrykim");
+    @BeforeAll
+    private static void setDB(@Autowired UserRepository userRepository, @Autowired ProductRepository productRepository, @Autowired PasswordEncoder passwordEncoder){
+        userRepository.save(new User("test1", passwordEncoder.encode("1234"),"nickname"));
+        productRepository.save(new Product(null,"Nike","Nike","나이키"));
+    }
 
     /**
      * 로컬 h2 데이터베이스에 임의의 유저, product 넣어놓고 테스트
      * user1(id='test1', nickname='nickname', password='1234')
      * pruduct1(id=1,brand='Nike',nameEng='Nike',nameKor='나이키')
      */
+    private static final Algorithm ALGORITHM = Algorithm.HMAC256("carrykim");
     public HttpEntity<?> getHeader(ProductRequest productRequest){
         String username="test1";
         String password ="1234";
@@ -54,7 +67,7 @@ public class ProductIntegrationTest {
 
         @Test
         @DisplayName("성공")
-        void test11(){
+        void test1(){
             //given
             long productId = 1;
 
@@ -86,8 +99,8 @@ public class ProductIntegrationTest {
         @DisplayName("실패")
         class Fail{
             @Test
-            @DisplayName("상품 x")
-            void test6(){
+            @DisplayName("상품 없음")
+            void test1(){
                 //given
                 long productId = 2;
 
@@ -98,7 +111,6 @@ public class ProductIntegrationTest {
 
                 //when
                 ResponseEntity<String> response = testRestTemplate
-                        .withBasicAuth("test1","1234")
                         .postForEntity(
                                 "/api/products/buy/"+productId,
                                 requestEntity,
@@ -110,8 +122,8 @@ public class ProductIntegrationTest {
             }
 
             @Test
-            @DisplayName("사이즈 x")
-            void test7(){
+            @DisplayName("사이즈 없음")
+            void test2(){
                 //given
                 long productId = 1;
 
@@ -134,7 +146,7 @@ public class ProductIntegrationTest {
 
             @Test
             @DisplayName("사이즈 0")
-            void test8(){
+            void test3(){
                 //given
                 long productId = 1;
 
@@ -157,7 +169,7 @@ public class ProductIntegrationTest {
 
             @Test
             @DisplayName("로그인 안 함")
-            void test9(){
+            void test4(){
                 //given
                 long productId = 1;
 
@@ -183,7 +195,7 @@ public class ProductIntegrationTest {
 
             @Test
             @DisplayName("구매 정상")
-            void test10(){
+            void test5(){
                 //given
                 long productId = 1;
 
@@ -215,8 +227,8 @@ public class ProductIntegrationTest {
         @DisplayName("실패")
         class Fail{
             @Test
-            @DisplayName("상품 x")
-            void test0(){
+            @DisplayName("상품 없음")
+            void test1(){
                 //given
                 long productId = 2;
 
@@ -227,7 +239,6 @@ public class ProductIntegrationTest {
 
                 //when
                 ResponseEntity<String> response = testRestTemplate
-                        .withBasicAuth("test1","1234")
                         .postForEntity(
                                 "/api/products/sell/"+productId,
                                 requestEntity,
@@ -240,7 +251,7 @@ public class ProductIntegrationTest {
 
             @Test
             @DisplayName("사이즈, 가격 0")
-            void test1(){
+            void test2(){
                 //given
                 long productId = 1;
 
@@ -251,7 +262,6 @@ public class ProductIntegrationTest {
 
                 //when
                 ResponseEntity<String> response = testRestTemplate
-                        .withBasicAuth("test1","1234")
                         .postForEntity(
                                 "/api/products/sell/"+productId,
                                 requestEntity,
@@ -264,7 +274,7 @@ public class ProductIntegrationTest {
 
             @Test
             @DisplayName("사이즈 0")
-            void test2(){
+            void test3(){
                 //given
                 long productId = 1;
 
@@ -275,7 +285,6 @@ public class ProductIntegrationTest {
 
                 //when
                 ResponseEntity<String> response = testRestTemplate
-                        .withBasicAuth("test1","1234")
                         .postForEntity(
                                 "/api/products/sell/"+productId,
                                 requestEntity,
@@ -288,7 +297,7 @@ public class ProductIntegrationTest {
 
             @Test
             @DisplayName("가격 0")
-            void test3(){
+            void test4(){
                 //given
                 long productId = 1;
 
@@ -299,7 +308,6 @@ public class ProductIntegrationTest {
 
                 //when
                 ResponseEntity<String> response = testRestTemplate
-                        .withBasicAuth("test1","1234")
                         .postForEntity(
                                 "/api/products/sell/"+productId,
                                 requestEntity,
@@ -311,8 +319,31 @@ public class ProductIntegrationTest {
             }
 
             @Test
+            @DisplayName("가격 단위 실패")
+            void test5(){
+                //given
+                long productId = 1;
+
+                ProductRequest productRequest = ProductRequest.builder()
+                        .size(240).price(1000100).build();
+
+                HttpEntity<?> requestEntity = getHeader(productRequest);
+
+                //when
+                ResponseEntity<String> response = testRestTemplate
+                        .postForEntity(
+                                "/api/products/sell/"+productId,
+                                requestEntity,
+                                String.class
+                        );
+                //then
+                assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+                assertEquals("가격은 천원단위로 입력해주세요.",response.getBody());
+            }
+
+            @Test
             @DisplayName("로그인 안 함")
-            void test4(){
+            void test6(){
                 //given
                 long productId = 1;
 
@@ -338,7 +369,7 @@ public class ProductIntegrationTest {
 
             @Test
             @DisplayName("판매 정상")
-            void test5(){
+            void test7(){
                 //given
                 long productId = 1;
 
@@ -349,7 +380,6 @@ public class ProductIntegrationTest {
 
                 //when
                 ResponseEntity<String> response = testRestTemplate
-                        .withBasicAuth("test1","1234")
                         .postForEntity(
                                 "/api/products/sell/"+productId,
                                 requestEntity,
