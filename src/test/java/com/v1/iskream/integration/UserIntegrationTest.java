@@ -40,10 +40,6 @@ public class UserIntegrationTest {
         userRepository.save(new User("user", passwordEncoder.encode("1234"),"kimseonjin"));
     }
 
-    @AfterEach
-    private void resetDB(){
-        userRepository.deleteAll();
-    }
 
     private static final Algorithm ALGORITHM = Algorithm.HMAC256("carrykim");
 

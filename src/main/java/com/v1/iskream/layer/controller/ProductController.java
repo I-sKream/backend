@@ -27,8 +27,9 @@ public class ProductController {
     }
 
     @GetMapping("/api/products/{product_id}")
-    public ProductResponseDto getDetails(@PathVariable Long product_id){
-        return productService.details(product_id);
+    public ResponseEntity<ProductResponseDto> getDetails(@PathVariable Long product_id){
+        ProductResponseDto responseDto = productService.details(product_id);
+        return new ResponseEntity(responseDto, HttpStatus.OK);
     }
 
     @PostMapping("/api/products/buy/{product_id}")
