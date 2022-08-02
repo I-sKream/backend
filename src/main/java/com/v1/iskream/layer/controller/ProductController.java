@@ -27,24 +27,30 @@ public class ProductController {
     }
 
     @GetMapping("/api/products/{product_id}")
-    public ProductResponseDto getDetails(@PathVariable Long product_id){
-        return productService.details(product_id);
+    public ResponseEntity<ProductResponseDto> getDetails(@PathVariable Long product_id){
+        ProductResponseDto responseDto = productService.details(product_id);
+        return new ResponseEntity(responseDto, HttpStatus.OK);
     }
 
-    @PostMapping("/api/products/{product_id}")
+    @PostMapping("/api/products/buy/{product_id}")
     public ResponseEntity<String> getBuy(@PathVariable Long product_id, @RequestBody ProductRequestDto requestDto, @AuthenticationPrincipal User user){
         return productService.buy(product_id,requestDto,user);
     }
 
+    @PostMapping("/api/products/sell/{product_id}")
+    public ResponseEntity<String> getSell(@PathVariable Long product_id, @RequestBody ProductRequestDto requestDto, @AuthenticationPrincipal User user){
+        return productService.sell(product_id,requestDto,user);
+    }
+
     @GetMapping("/api/products/recent")
     public ResponseEntity getRecentProducts(){
-        List<SimpleProductResponseDto> productResponseDtoList = productService.getProducts(15,0);
+        List<SimpleProductResponseDto> productResponseDtoList = productService.getProducts(16,0);
         return new ResponseEntity(productResponseDtoList, HttpStatus.OK);
     }
 
     @GetMapping("/api/products")
     public ResponseEntity getProducts(@RequestParam @Min(1) int page){
-        List<SimpleProductResponseDto> productResponseDtoList = productService.getProducts(15, (page-1) * 15);
+        List<SimpleProductResponseDto> productResponseDtoList = productService.getProducts(16, (page-1) * 15);
         return new ResponseEntity(productResponseDtoList, HttpStatus.OK);
     }
 }

@@ -1,15 +1,18 @@
 package com.v1.iskream.config.security.filter;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.v1.iskream.config.security.UnauthorizedEntryPoint;
 import com.v1.iskream.config.security.jwt.JWTUtil;
 import com.v1.iskream.config.security.userDtail.UserDetailImpl;
 import com.v1.iskream.config.security.userDtail.UserDetailServiceImpl;
-import com.v1.iskream.layer.service.UserService;
+import com.v1.iskream.layer.domain.dto.response.LoginResponseDto;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 
 import javax.servlet.FilterChain;
@@ -21,37 +24,49 @@ import java.io.IOException;
 public class JWTCheckFilter extends BasicAuthenticationFilter {
 
     private UserDetailServiceImpl userDetailsService;
+    private ObjectMapper objectMapper = new ObjectMapper();
+    private final UnauthorizedEntryPoint unauthorizedEntryPoint;
 
-    public JWTCheckFilter(AuthenticationManager authenticationManager, UserDetailServiceImpl userDetailsService) {
+    public JWTCheckFilter(AuthenticationManager authenticationManager, UserDetailServiceImpl userDetailsService, UnauthorizedEntryPoint unauthorizedEntryPoint) {
         super(authenticationManager);
         this.userDetailsService = userDetailsService;
+        this.unauthorizedEntryPoint = unauthorizedEntryPoint;
     }
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain) throws IOException, ServletException {
+        try {
+            String bearer = request.getHeader(HttpHeaders.AUTHORIZATION);
 
-        String bearer = request.getHeader(HttpHeaders.AUTHORIZATION);
+            if (bearer == null || !bearer.startsWith("Bearer ")) {
+                super.doFilterInternal(request, response, chain);
+                return;
+            }
 
-        if(bearer == null || !bearer.startsWith("Bearer ")){
-            super.doFilterInternal(request, response, chain);
-            return;
+            String token = bearer.substring("Bearer ".length());
+
+            String username = JWTUtil.verify(token);
+
+            if (username != "") {
+                UsernamePasswordAuthenticationToken userToken = getUserToken(username);
+                SecurityContextHolder.getContext().setAuthentication(userToken);
+                super.doFilterInternal(request, response, chain);
+            } else {
+                throw new AuthenticationException("유효하지 않은 토큰입니다.") {};
+            }
+        }catch (AuthenticationException e){
+            unauthorizedEntryPoint.commence(request, response, e);
         }
+    }
 
-        String token = bearer.substring("Bearer ".length());
-
-        String username = JWTUtil.verify(token);
-
-        System.out.println(username);
-
-        if(username != "") {
+    private UsernamePasswordAuthenticationToken getUserToken(String username){
+        try {
             UserDetailImpl user = userDetailsService.loadUserByUsername(username);
-            UsernamePasswordAuthenticationToken userToken = new UsernamePasswordAuthenticationToken(
+            return new UsernamePasswordAuthenticationToken(
                     user.getUser(), null, user.getAuthorities()
             );
-            SecurityContextHolder.getContext().setAuthentication(userToken);
-            super.doFilterInternal(request, response, chain);
-        }else{
-            throw new RuntimeException("Token is not valid");
+        }catch (Exception e){
+            throw new AuthenticationException("존재하지 않는 유저입니다."){};
         }
     }
 }

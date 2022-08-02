@@ -2,9 +2,7 @@ package com.v1.iskream.layer.domain.dto.request;
 
 import lombok.*;
 
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
+@Getter
 public class SignupRequestDto {
     private String id;
     private String nickname;

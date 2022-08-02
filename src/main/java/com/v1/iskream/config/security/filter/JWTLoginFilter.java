@@ -6,6 +6,7 @@ import com.v1.iskream.config.security.jwt.JWTUtil;
 import com.v1.iskream.layer.domain.dto.request.LoginRequestDto;
 import com.v1.iskream.layer.domain.dto.response.LoginResponseDto;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -25,7 +26,7 @@ public class JWTLoginFilter extends UsernamePasswordAuthenticationFilter {
 
     public JWTLoginFilter(AuthenticationManager authenticationManager) {
         super(authenticationManager);
-        setFilterProcessesUrl("/users/login");
+        setFilterProcessesUrl("/api/users/login");
     }
 
     // 검증 과정
@@ -43,7 +44,7 @@ public class JWTLoginFilter extends UsernamePasswordAuthenticationFilter {
             return getAuthenticationManager().authenticate(token);
 
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new AuthenticationException("로그인 요청 형식에 맞지 않습니다."){};
         }
     }
 
@@ -56,7 +57,7 @@ public class JWTLoginFilter extends UsernamePasswordAuthenticationFilter {
 
         UserDetailImpl userDetail = (UserDetailImpl) authResult.getPrincipal();
         String token =  JWTUtil.getToken(userDetail);
-        LoginResponseDto loginResponseDto = new LoginResponseDto(200, "로그인에 성공했습니다.");
+        LoginResponseDto loginResponseDto = new LoginResponseDto(200, "로그인에 성공했습니다.", token);
 
         response.setHeader(HttpHeaders.AUTHORIZATION, "Bearer " + token);
         response.setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE);
@@ -68,8 +69,15 @@ public class JWTLoginFilter extends UsernamePasswordAuthenticationFilter {
             HttpServletRequest request,
             HttpServletResponse response,
             AuthenticationException failed) throws IOException, ServletException {
-        LoginResponseDto errorResponse = new LoginResponseDto(401, "로그인 정보가 일치하지 않습니다.");
+        String msg = messageFilter(failed.getLocalizedMessage());
+        LoginResponseDto errorResponse = new LoginResponseDto(400, msg, null);
         response.setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE);
+        response.setStatus(HttpStatus.BAD_REQUEST.value());
         response.getOutputStream().write(objectMapper.writeValueAsBytes(errorResponse));
+    }
+    private String messageFilter(String msg){
+        if(msg.equals("자격 증명에 실패하였습니다."))
+            return "비밀번호가 틀렸습니다.";
+        return msg;
     }
 }

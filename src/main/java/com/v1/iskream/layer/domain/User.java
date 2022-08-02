@@ -1,5 +1,6 @@
 package com.v1.iskream.layer.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -16,17 +17,10 @@ public class User {
     @Id
     private String id;
 
+    @JsonIgnore
     @Column(nullable = false, unique = true)
     private String password;
 
     @Column(nullable = false)
     private String nickname;
-
-    @Override
-    public String toString() {
-        return "User{" +
-                "id='" + id + '\'' +
-                ", nickname='" + nickname + '\'' +
-                '}';
-    }
 }

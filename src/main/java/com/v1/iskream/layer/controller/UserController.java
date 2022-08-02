@@ -9,7 +9,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/users")
+@RequestMapping("/api/users")
 public class UserController {
 
     private final UserService userService;
@@ -20,13 +20,13 @@ public class UserController {
 
     @PostMapping("/signup")
     public ResponseEntity signUp(@RequestBody SignupRequestDto signupRequestDto){
-        System.out.println(signupRequestDto);
         userService.save(signupRequestDto);
         return new ResponseEntity(HttpStatus.OK);
     }
 
-    @GetMapping("/auth")
-    public ResponseEntity auth(@AuthenticationPrincipal User user){
+    @GetMapping("/detail/data")
+    public ResponseEntity userData(@AuthenticationPrincipal User user){
+        System.out.println(user);
         return new ResponseEntity(user, HttpStatus.OK);
     }
 

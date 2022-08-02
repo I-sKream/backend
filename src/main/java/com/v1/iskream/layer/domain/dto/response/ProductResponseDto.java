@@ -1,21 +1,24 @@
 package com.v1.iskream.layer.domain.dto.response;
 
 import com.v1.iskream.layer.domain.Product;
-import com.v1.iskream.layer.domain.Thumbnail;
-import com.v1.iskream.layer.domain.dto.response.PriceResponseDto;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import java.util.List;
 
+@NoArgsConstructor
+@AllArgsConstructor
 @Getter
 public class ProductResponseDto {
-    private final Long id;
-    private final List<ThumbnailResponseDto> thumbnail;
-    private final String product_name_kor;
-    private final String product_name_eng;
+    private Long id;
+    private List<ThumbnailResponseDto> thumbnail;
+    private String product_name_kor;
+    private String product_name_eng;
 //    private int product_price;
-    private final List<PriceResponseDto> prices;
-    private final String product_brand;
+    private List<PriceResponseDto> prices;
+    private String product_brand;
 
     public ProductResponseDto(Product product, List<PriceResponseDto> prices, List<ThumbnailResponseDto> thumbnail) {
         this.id = product.getId();
