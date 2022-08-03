@@ -52,10 +52,25 @@ jacocoTestReport {
 		csv.enabled true
 		xml.enabled false
 	}
+	afterEvaluate {
+		classDirectories.setFrom(files(classDirectories.files.collect {
+			fileTree(dir: it,
+					exclude: ["com/v1/iskream/layer/domain/**",
+							  "com/v1/iskream/IskreamApplication.class"])
+		}))
+	}
 	finalizedBy 'jacocoTestCoverageVerification'
+
 }
 
 jacocoTestCoverageVerification {
+	afterEvaluate {
+		classDirectories.setFrom(files(classDirectories.files.collect {
+			fileTree(dir: it,
+					exclude: ["com/v1/iskream/layer/domain/**",
+							  "com/v1/iskream/IskreamApplication.class"])
+		}))
+	}
 	violationRules{
 		rule {
 			enabled = true
@@ -73,7 +88,7 @@ jacocoTestCoverageVerification {
 				minimum = 0.80
 			}
 
-			excludes = []
+			excludes = ["com/v1/iskream/layer/domain/**"]
 		}
 	}
 }
