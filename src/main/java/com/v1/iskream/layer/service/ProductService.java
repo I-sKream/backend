@@ -104,12 +104,25 @@ public class ProductService {
                 .collect(Collectors.toList());
     }
 
-    // 평균 가격 구하는 로직 - recentProduct
+    public List<AvgPriceResponseDto> getAvgPrice(Long product_id){
+        List<AvgPrice> list = avgPriceRepository.avgPriceById(product_id);
+        List<AvgPriceResponseDto> responseDtoList = new ArrayList<>();
+        for(int i = 0; i < 7; i++){
+            responseDtoList.add(mappingAvgPriceResponseDto(list.get(i)));
+        }
+        return responseDtoList;
+    }
     private BigInteger getAvgPriceFromProduct(Long product_id){
         BigInteger price = priceRepository.avgPriceById(product_id);
         price = price.divide(BigInteger.valueOf(10000));
         price = price.multiply(BigInteger.valueOf(10000));
         return price;
+    }
+
+
+    // Model to DTO
+    private AvgPriceResponseDto mappingAvgPriceResponseDto(AvgPrice avgPrice){
+        return new AvgPriceResponseDto(avgPrice.getProductId(), avgPrice.getDate(), avgPrice.getAvgPrice());
     }
 
     // recent product 조회 값 response 변환
@@ -123,6 +136,8 @@ public class ProductService {
                 .build();
     }
 
+
+    // Check logic
     public boolean NotLogin(User user){
         return user == null;
     }
@@ -134,20 +149,5 @@ public class ProductService {
     }
     public boolean UnitPrice(ProductRequestDto requestDto){
         return requestDto.getPrice() % 1000 != 0;
-    }
-
-    public List<AvgPriceResponseDto> getAvgPrice(Long product_id){
-        List<AvgPrice> list = avgPriceRepository.avgPriceById(product_id);
-        List<AvgPriceResponseDto> responseDtoList = new ArrayList<>();
-        for(int i = 0; i < 7; i++){
-            System.out.println(list.get(i).getProductId());
-            responseDtoList.add(mappingAvgPriceResponseDto(list.get(i)));
-        }
-        return responseDtoList;
-    }
-
-
-    private AvgPriceResponseDto mappingAvgPriceResponseDto(AvgPrice avgPrice){
-        return new AvgPriceResponseDto(avgPrice.getProductId(), avgPrice.getDate(), avgPrice.getAvgPrice());
     }
 }
