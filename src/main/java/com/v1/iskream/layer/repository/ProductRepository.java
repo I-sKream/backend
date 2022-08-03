@@ -1,5 +1,6 @@
 package com.v1.iskream.layer.repository;
 
+import com.v1.iskream.layer.domain.AvgPrice;
 import com.v1.iskream.layer.domain.Product;
 import com.v1.iskream.layer.domain.RecentProductInterface;
 import org.springframework.data.jpa.repository.JpaRepository;

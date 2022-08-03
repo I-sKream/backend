@@ -53,4 +53,10 @@ public class ProductController {
         List<SimpleProductResponseDto> productResponseDtoList = productService.getProducts(16, (page-1) * 15);
         return new ResponseEntity(productResponseDtoList, HttpStatus.OK);
     }
+
+    @PostMapping("/api/products/avgprice/{product_id}")
+    public ResponseEntity getAvgPrice(@PathVariable Long product_id){
+        return new ResponseEntity(productService.getAvgPrice(product_id), HttpStatus.OK);
+    }
+
 }

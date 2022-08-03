@@ -2,10 +2,8 @@ package com.v1.iskream.layer.service;
 
 import com.v1.iskream.layer.domain.*;
 import com.v1.iskream.layer.domain.dto.request.ProductRequestDto;
-import com.v1.iskream.layer.domain.dto.response.PriceResponseDto;
-import com.v1.iskream.layer.domain.dto.response.ProductResponseDto;
-import com.v1.iskream.layer.domain.dto.response.SimpleProductResponseDto;
-import com.v1.iskream.layer.domain.dto.response.ThumbnailResponseDto;
+import com.v1.iskream.layer.domain.dto.response.*;
+import com.v1.iskream.layer.repository.AvgPriceRepository;
 import com.v1.iskream.layer.repository.OrdersRepository;
 import com.v1.iskream.layer.repository.PriceRepository;
 import com.v1.iskream.layer.repository.ProductRepository;
@@ -27,11 +25,14 @@ public class ProductService {
     private final OrdersRepository ordersRepository;
     private final PriceRepository priceRepository;
 
+    private final AvgPriceRepository avgPriceRepository;
+
     @Autowired
-    public ProductService(ProductRepository productRepository, OrdersRepository ordersRepository, PriceRepository priceRepository) {
+    public ProductService(ProductRepository productRepository, OrdersRepository ordersRepository, PriceRepository priceRepository, AvgPriceRepository avgPriceRepository) {
         this.productRepository = productRepository;
         this.ordersRepository = ordersRepository;
         this.priceRepository = priceRepository;
+        this.avgPriceRepository = avgPriceRepository;
     }
 
     // 상품 상세조회
@@ -133,5 +134,20 @@ public class ProductService {
     }
     public boolean UnitPrice(ProductRequestDto requestDto){
         return requestDto.getPrice() % 1000 != 0;
+    }
+
+    public List<AvgPriceResponseDto> getAvgPrice(Long product_id){
+        List<AvgPrice> list = avgPriceRepository.avgPriceById(product_id);
+        List<AvgPriceResponseDto> responseDtoList = new ArrayList<>();
+        for(int i = 0; i < 7; i++){
+            System.out.println(list.get(i).getProductId());
+            responseDtoList.add(mappingAvgPriceResponseDto(list.get(i)));
+        }
+        return responseDtoList;
+    }
+
+
+    private AvgPriceResponseDto mappingAvgPriceResponseDto(AvgPrice avgPrice){
+        return new AvgPriceResponseDto(avgPrice.getProductId(), avgPrice.getDate(), avgPrice.getAvgPrice());
     }
 }
