@@ -2,10 +2,8 @@ package com.v1.iskream.layer.service;
 
 import com.v1.iskream.layer.domain.*;
 import com.v1.iskream.layer.domain.dto.request.ProductRequestDto;
-import com.v1.iskream.layer.domain.dto.response.PriceResponseDto;
-import com.v1.iskream.layer.domain.dto.response.ProductResponseDto;
-import com.v1.iskream.layer.domain.dto.response.SimpleProductResponseDto;
-import com.v1.iskream.layer.domain.dto.response.ThumbnailResponseDto;
+import com.v1.iskream.layer.domain.dto.response.*;
+import com.v1.iskream.layer.repository.AvgPriceRepository;
 import com.v1.iskream.layer.repository.OrdersRepository;
 import com.v1.iskream.layer.repository.PriceRepository;
 import com.v1.iskream.layer.repository.ProductRepository;
@@ -27,13 +25,17 @@ public class ProductService {
     private final OrdersRepository ordersRepository;
     private final PriceRepository priceRepository;
 
+    private final AvgPriceRepository avgPriceRepository;
+
     @Autowired
-    public ProductService(ProductRepository productRepository, OrdersRepository ordersRepository, PriceRepository priceRepository) {
+    public ProductService(ProductRepository productRepository, OrdersRepository ordersRepository, PriceRepository priceRepository, AvgPriceRepository avgPriceRepository) {
         this.productRepository = productRepository;
         this.ordersRepository = ordersRepository;
         this.priceRepository = priceRepository;
+        this.avgPriceRepository = avgPriceRepository;
     }
 
+    // 상품 상세조회
     public ProductResponseDto details(Long product_id) {
         Product product = productRepository.findById(product_id).orElseThrow(
                 () -> new IllegalArgumentException("상품을 찾을 수 없습니다.")
@@ -55,7 +57,6 @@ public class ProductService {
             for(Price size : sizes) totalPrice += size.getPrice();
             int averagePrice = totalPrice/sizes.size();
             int priceDiff = price.getPrice()-averagePrice;
-//            Price maxPrice = priceRepository.findTopByProductAndSizeOrderByPriceDesc(product, price.getSize());
             PriceResponseDto responseDto = new PriceResponseDto(price, priceDiff);
             map.put(price.getSize(), responseDto);
         }
@@ -65,6 +66,7 @@ public class ProductService {
         return new ProductResponseDto(product,priceList,thumbList);
     }
 
+    // 상품 구매
     public ResponseEntity<String> buy(Long product_id, ProductRequestDto requestDto, User user) {
         Product product = productRepository.findById(product_id).orElseThrow(
                 () -> new IllegalArgumentException("상품을 찾을 수 없습니다.")
@@ -80,12 +82,14 @@ public class ProductService {
         return new ResponseEntity<>(msg, HttpStatus.CREATED);
     }
 
+    // 상품 판매
     public ResponseEntity<String> sell(Long product_id, ProductRequestDto requestDto, User user){
         Product product = productRepository.findById(product_id).orElseThrow(
                 () -> new IllegalArgumentException("상품을 찾을 수 없습니다.")
         );
         if(NotLogin(user)) throw new IllegalArgumentException("로그인이 필요합니다.");
         if(EmptyValues(requestDto)) throw new IllegalArgumentException("값을 입력해주세요.");
+        if(UnitPrice(requestDto)) throw new IllegalArgumentException("가격은 천원단위로 입력해주세요.");
         Price price = new Price(requestDto,product,user);
         product.addPrice(price);
         priceRepository.save(price);
@@ -100,12 +104,25 @@ public class ProductService {
                 .collect(Collectors.toList());
     }
 
-    // 평균 가격 구하는 로직 - recentProduct
+    public List<AvgPriceResponseDto> getAvgPrice(Long product_id){
+        List<AvgPrice> list = avgPriceRepository.avgPriceById(product_id);
+        List<AvgPriceResponseDto> responseDtoList = new ArrayList<>();
+        for(int i = 0; i < 7; i++){
+            responseDtoList.add(mappingAvgPriceResponseDto(list.get(i)));
+        }
+        return responseDtoList;
+    }
     private BigInteger getAvgPriceFromProduct(Long product_id){
         BigInteger price = priceRepository.avgPriceById(product_id);
         price = price.divide(BigInteger.valueOf(10000));
         price = price.multiply(BigInteger.valueOf(10000));
         return price;
+    }
+
+
+    // Model to DTO
+    private AvgPriceResponseDto mappingAvgPriceResponseDto(AvgPrice avgPrice){
+        return new AvgPriceResponseDto(avgPrice.getProductId(), avgPrice.getDate(), avgPrice.getAvgPrice());
     }
 
     // recent product 조회 값 response 변환
@@ -119,14 +136,18 @@ public class ProductService {
                 .build();
     }
 
+
+    // Check logic
     public boolean NotLogin(User user){
         return user == null;
     }
-
     public boolean EmptyValue(ProductRequestDto requestDto){
         return requestDto.getSize() == 0;
     }
     public boolean EmptyValues(ProductRequestDto requestDto){
         return requestDto.getSize() == 0 || requestDto.getPrice() == 0;
+    }
+    public boolean UnitPrice(ProductRequestDto requestDto){
+        return requestDto.getPrice() % 1000 != 0;
     }
 }

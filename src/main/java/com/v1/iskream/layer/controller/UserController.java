@@ -24,14 +24,10 @@ public class UserController {
         return new ResponseEntity(HttpStatus.OK);
     }
 
-    @GetMapping("/auth")
-    public ResponseEntity auth(@AuthenticationPrincipal User user){
+    @GetMapping("/detail/data")
+    public ResponseEntity userData(@AuthenticationPrincipal User user){
+        System.out.println(user);
         return new ResponseEntity(user, HttpStatus.OK);
-    }
-
-    @GetMapping("/test")
-    public String test(){
-        return "test";
     }
 
 }

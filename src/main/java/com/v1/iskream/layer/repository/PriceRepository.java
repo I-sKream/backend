@@ -15,7 +15,7 @@ public interface PriceRepository extends JpaRepository<Price, Long> {
 
     @Query(value =
             "SELECT AVG(price.price)\n" +
-                    "\t\tFROM kream.price as price \n" +
+                    "\t\tFROM price as price \n" +
                     "        WHERE product_id = :id\n" +
                     "\t\tGROUP BY product_id"
             ,nativeQuery = true)

@@ -25,7 +25,7 @@ public class UserService {
 
     public User findOne(String userId) {
         User user = userRepository.findById(userId).orElseThrow(
-                () -> new NullPointerException("존재하지 않는 회원입니다.")
+                () -> new IllegalArgumentException("존재하지 않는 회원입니다.")
         );
         return user;
     }
