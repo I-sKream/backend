@@ -24,6 +24,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.*;
+import org.springframework.test.context.ActiveProfiles;
 
 import java.math.BigInteger;
 import java.time.Instant;
@@ -34,7 +35,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-//@ActiveProfiles("test")
+@ActiveProfiles("test")
 public class ProductIntegrationTest {
 
     @Autowired
@@ -81,43 +82,6 @@ public class ProductIntegrationTest {
                     requestHeaders.add("Authorization",authorizationHeader);
 
         return new HttpEntity<>(productRequest,requestHeaders);
-    }
-    @Nested
-    @DisplayName("차트 조회")
-    class ProductChart{
-
-        @Test
-        @DisplayName("성공")
-        void test1(){
-            //given
-            long productId = 1;
-//
-//            //when
-//            ResponseEntity<AvgPriceResponseDto[]> response = testRestTemplate
-//                    .getForEntity(
-//                            "/api/products/avgprice/"+productId,
-//                            AvgPriceResponseDto[].class
-//                    );
-//            //then
-//            AvgPriceResponseDto[] chart = response.getBody();
-//            assertEquals(HttpStatus.OK, response.getStatusCode());
-//            assertNotNull(charts);
-//            assertEquals(7, charts.length);
-//            for(AvgPriceResponseDto chart : charts) {
-//                assertEquals(1,chart.getProduct_id());
-//                assertEquals(10000,chart.getAvg_price());
-//                assertEquals("2022-08-03",chart.getDate());
-//            }
-            ResponseEntity<List<AvgPriceResponseDto>> response = testRestTemplate
-                    .exchange(
-                            "/api/products/avgprice/"+productId,
-                            HttpMethod.GET,
-                            null,
-                            new ParameterizedTypeReference<List<AvgPriceResponseDto>>() {}
-                    );
-            //then
-            assertEquals(HttpStatus.OK, response.getStatusCode());
-        }
     }
 
     @Nested
